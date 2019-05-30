@@ -1,29 +1,44 @@
 ''' We parse each document of each file from our data set '''
 ''' This results in a dictionary docID:content '''
 
+from nltk.corpus import stopwords
+import nltk
+import re
 
-def docsToDict(fname):
+# Turns xml parsed file into dictionary of document contents
+def docsToFiles(fname, language):
 
-    docs = {}
     backup = {}
+    folder_path = './DOCUMENTS/'
     with open(fname) as in_file:
         lines = [[line.rstrip('\n')] for line in in_file]
-    
-    position = 0
+
     for line in lines:
-        # print(line)
         if '<doc id=' in line[0]:
             elements = line[0].split()
             docID = elements[1][4:-1]
             url = elements[2][5:-1]
             title = elements[3][7:]
-
-            docs[docID] = []
+            flt = []
             backup[docID] = [title, url]
         elif '</doc>' in line[0]:
+            with open(folder_path + docID + '.txt', 'w') as f:
+                f.write(str(flt))
             docID = None
         else:
             if docID and line[0] != '':
-                docs[docID].extend(line) 
+                sl = []
+                sl.extend(line)
+                s = re.sub(r'[^\w\s]', '', sl[0])
+                tokens = nltk.word_tokenize(s.lower())
+                # print(tokens)
+                new = [w for w in tokens if not w in stopwords.words(language)]
+                flt.extend(new)
+                
+    return backup
 
-docsToDict('wiki_01')
+        
+
+if __name__ == '__main__':
+    backup = docsToFiles('wiki_01', 'french')
+    
