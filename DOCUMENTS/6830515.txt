@@ -1,0 +1,1 @@
+'index', 'histori', 'articl', 'histori', 'studi', 'past', 'use', 'name', 'field', 'studi', 'histori', 'refer', 'studi', 'interpret', 'record', 'human', 'famili', 'societi', 'preserv', 'primarili', 'written', 'sourc', 'list', 'histori', 'topic', 'cover', 'english', 'wikipedia'
