@@ -53,8 +53,8 @@ def indexing(backup):
     
     for k in backup.keys():
         docID = k
-        with open(folder_path + docID + '.txt', 'r') as f:
-            line = f.read().split(' ')
+        with open(folder_path + docID + '.txt', 'r') as inputs:
+            line = inputs.read().split(' ')
         Ndic[docID] = len(line)
         for token in line:
             if token not in index_dic.keys():
@@ -66,7 +66,11 @@ def indexing(backup):
                     index_dic[token][docID] += 1
                 else:
                     index_dic[token][docID] = 1
-    
+    with open('index.txt', 'w') as output:
+        for k, v in index_dic.items():
+            word, IDs = k, str([id for id in v.keys()])
+            output.write(word + ' ' + IDs + '\n')
+
     return Ndic, index_dic, posDic
 
 
@@ -92,18 +96,11 @@ def doc_vector(ind, back, pos, docLen):
                 docID, row = str(key), str(val)
                 mapp.write(docID + ' ' + row + '\n')
     
-        
     
-        
-
-        
 
 if __name__ == '__main__':
     backup = docsToFiles('wiki_en', 'english')
     docLenghts, index, positions = indexing(backup)
     doc_vector(index, backup, positions, docLenghts)
-
-
-    # print(backup)
     
     
