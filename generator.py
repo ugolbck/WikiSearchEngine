@@ -39,6 +39,8 @@ def docsToFiles(fname, language):
                 stemmer = PorterStemmer()
                 final = [stemmer.stem(word) for word in new]
                 flt.extend(final)
+        with open('backup.txt', 'w') as f:
+            pass
          
     return backup
 
