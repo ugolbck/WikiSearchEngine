@@ -78,6 +78,7 @@ def standardPostings(query, ind):
             union += [docId for docId in index[word] ]
     return sorted(list(set(union)))
 
+# Posting list retrieval for intersected query
 def manyIntersect(query, ind):
     # Sorting by length of postings list
     query.sort(key = lambda l: len(index[l]))
@@ -145,6 +146,17 @@ def cosine(q_vector, mat, mapp, postings):
     ranking = sorted(relevance, key=relevance.get, reverse=True)
     return ranking
     
+def url_gen(ranking, threshold):
+    base = 'https://en.wikipedia.org/wiki?curid='
+    with open('top_documents.txt', 'a') as f:
+        try:
+            for i in range(0, threshold):
+                url = base + ranking[i]
+                print(url)
+        except IndexError:
+            print('No other relevant documents found.')
+
+
 
 if __name__ == '__main__':
     matrix, index, mapping, positions = filesToDicts()
@@ -158,12 +170,18 @@ if __name__ == '__main__':
     union_rank = cosine(vector, matrix, mapping, union_list)
     intersect_rank = cosine(vector, matrix, mapping, intersect_list)
 
+
     if union_rank:
-        print(union_rank)
+        print('Ranking of relevant documents at least one of the query terms:')
+        url_gen(union_list, 5)
     else:
         print('No documents were found in the union ranking.')
+    
+    print('')
+
     if intersect_rank:
-        print(intersect_rank)
+        print('Ranking of relevant documents containing all query terms')
+        url_gen(intersect_list, 6)
     else:
         print('No documents were found in the intersect ranking.')
 

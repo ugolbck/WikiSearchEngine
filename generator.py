@@ -18,12 +18,12 @@ def docsToFiles(fname, language):
 
     for line in lines:
         if '<doc id=' in line[0]:
-            elements = line[0].split()
+            elements = line[0].split(' ')
             docID = elements[1][4:-1]
-            url = elements[2][5:-1]
-            title = elements[3][7:]
+            url = elements[2][5:-1] 
             flt = []
-            backup[docID] = [title, url]
+            backup[docID] = url
+            # print(elements)
         elif '</doc>' in line[0]:
             with open(folder_path + docID + '.txt', 'w') as f:
                 flt = re.sub(r'[^\w\s]', '', str(flt))
@@ -39,8 +39,6 @@ def docsToFiles(fname, language):
                 stemmer = PorterStemmer()
                 final = [stemmer.stem(word) for word in new]
                 flt.extend(final)
-        with open('backup.txt', 'w') as f:
-            pass
          
     return backup
 
