@@ -11,7 +11,6 @@ import math
 
 # Turns xml parsed file into separate documents
 def docsToFiles(fname, language):
-
     backup = {}
     folder_path = './DOCUMENTS/'
     with open(fname) as in_file:
@@ -40,10 +39,12 @@ def docsToFiles(fname, language):
                 stemmer = PorterStemmer()
                 final = [stemmer.stem(word) for word in new]
                 flt.extend(final)
-                
+         
     return backup
 
-
+# Creation of posting list (index_dic), lenght of document memory (Ndic),
+# position of words in vectors (posDic)
+# Index file is saved without word countings in each file
 def indexing(backup):
     index_dic = {}
     Ndic = {}
@@ -66,10 +67,14 @@ def indexing(backup):
                     index_dic[token][docID] += 1
                 else:
                     index_dic[token][docID] = 1
-    with open('index.txt', 'w') as output:
+    with open('index.txt', 'w') as index_output, open('positions.txt', 'w') as position_output:
         for k, v in index_dic.items():
             word, IDs = k, str([id for id in v.keys()])
-            output.write(word + ' ' + IDs + '\n')
+            IDs = re.sub(r'[^\w\s]', '', IDs)
+            index_output.write(word + ' ' + IDs + '\n')
+        for k, v in posDic.items():
+            word, pos = k, str(v)
+            position_output.write(word + ' ' + pos + '\n')   
 
     return Ndic, index_dic, posDic
 
@@ -79,6 +84,7 @@ def doc_vector(ind, back, pos, docLen):
     mapping = {}
     matrix = zeros(shape=(len(back.keys()), len(ind.keys())))
     pointer = 0
+
     for i in back.keys():
         file_words = set()
         for k, v in ind.items():
@@ -90,6 +96,7 @@ def doc_vector(ind, back, pos, docLen):
             matrix[pointer][pos[j]] = tf * idf
             mapping[i] = pointer
         pointer += 1
+
     with open('vectorSpace.txt', 'w') as vec, open('mapping.txt', 'w') as mapp:
             np.savetxt(vec, matrix, fmt='%.6f')
             for key, val in mapping.items():
