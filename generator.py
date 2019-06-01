@@ -8,6 +8,7 @@ import re
 from numpy import zeros
 import numpy as np
 import math
+import sys
 
 # Turns xml parsed file into separate documents
 def docsToFiles(fname, language):
@@ -106,7 +107,13 @@ def doc_vector(ind, back, pos, docLen):
     
 
 if __name__ == '__main__':
-    backup = docsToFiles('wiki_en', 'english')
+    
+    if len(sys.argv) != 2:
+        print('Wrong number of arguments. You must run the program with the following command:\n \
+        python generator.py <parsed xml file>')
+        sys.exit(0)
+    
+    backup = docsToFiles(sys.argv[1], 'english')
     docLenghts, index, positions = indexing(backup)
     doc_vector(index, backup, positions, docLenghts)
     

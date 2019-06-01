@@ -9,11 +9,9 @@ from nltk.stem import PorterStemmer
 import nltk
 import re
 import math
-
-
+import sys
 
 def filesToDicts():
-
     ind = {}
     mapp = {}
     pos = {}
@@ -47,7 +45,6 @@ def filesToDicts():
 
 # Query sanitizer (stopwords, lowercase, stemming, tokenizing)
 def query_sanity(query, language):
-
     stemmer = PorterStemmer()
     query = re.sub(r'[^\w\s]', '', str(query))
     tokens = nltk.word_tokenize(query.lower())
@@ -146,42 +143,46 @@ def cosine(q_vector, mat, mapp, postings):
     ranking = sorted(relevance, key=relevance.get, reverse=True)
     return ranking
     
-def url_gen(ranking, threshold):
+def url_gen(ranking, threshold, outputfile):
     base = 'https://en.wikipedia.org/wiki?curid='
-    with open('top_documents.txt', 'a') as f:
+    with open(outputfile, 'a') as f:
         try:
             for i in range(0, threshold):
                 url = base + ranking[i]
-                print(url)
+                f.write(url)
         except IndexError:
-            print('No other relevant documents found.')
+            f.write('No other relevant documents found.')
 
 
 
 if __name__ == '__main__':
-    matrix, index, mapping, positions = filesToDicts()
-    dummy = 'greek history'
-    sane_dummy = query_sanity(dummy, 'english')
-    vector = query_vector(sane_dummy, positions, index)
 
-    union_list = standardPostings(sane_dummy, index)
-    intersect_list = manyIntersect(sane_dummy, index)
+    if len(sys.argv) <= 1:
+        print('Wrong number of arguments. You must run the program with the following command:\n python query.py <query text>')
+        sys.exit(0)
+
+    matrix, index, mapping, positions = filesToDicts()
+    q = ' '.join(sys.argv[1:])
+    sane_q = query_sanity(q, 'english')
+    vector = query_vector(sane_q, positions, index)
+
+    union_list = standardPostings(sane_q, index)
+    intersect_list = manyIntersect(sane_q, index)
 
     union_rank = cosine(vector, matrix, mapping, union_list)
     intersect_rank = cosine(vector, matrix, mapping, intersect_list)
 
-
     if union_rank:
-        print('Ranking of relevant documents at least one of the query terms:')
-        url_gen(union_list, 5)
+        print('Ranking of relevant documents at least one of the query terms.')
+        url_gen(union_rank, 5, 'union_results.txt')
+        print('DONE.')
     else:
         print('No documents were found in the union ranking.')
-    
-    print('')
 
     if intersect_rank:
         print('Ranking of relevant documents containing all query terms')
-        url_gen(intersect_list, 6)
+        url_gen(intersect_rank, 6, 'intersect_results.txt')
+        print('DONE.')
     else:
         print('No documents were found in the intersect ranking.')
 
