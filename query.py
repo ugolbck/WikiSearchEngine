@@ -78,8 +78,12 @@ def standardPostings(query, ind):
 # Posting list retrieval for intersected query
 def manyIntersect(query, ind):
     # Sorting by length of postings list
-    query.sort(key = lambda l: len(index[l]))
-    
+    try:
+        query.sort(key = lambda l: len(index[l]))
+    except KeyError:
+        print('At least one of the terms doesn\'t exist in our corpus.')
+        exit(0)
+
     result = index[query[0]]
     del query[0]
     
@@ -145,11 +149,12 @@ def cosine(q_vector, mat, mapp, postings):
     
 def url_gen(ranking, threshold, outputfile):
     base = 'https://en.wikipedia.org/wiki?curid='
-    with open(outputfile, 'a') as f:
+    with open(outputfile, 'w') as f:
         try:
             for i in range(0, threshold):
                 url = base + ranking[i]
-                f.write(url)
+                f.write(url + '\n')
+                print('Rank', str(i+1) + ':', url)
         except IndexError:
             f.write('No other relevant documents found.')
 
@@ -173,15 +178,15 @@ if __name__ == '__main__':
     intersect_rank = cosine(vector, matrix, mapping, intersect_list)
 
     if union_rank:
-        print('Ranking of relevant documents at least one of the query terms.')
-        url_gen(union_rank, 5, 'union_results.txt')
+        print('Ranking of the TOP 10 relevant documents containing at least one of the query terms.')
+        url_gen(union_rank, 10, 'union_results.txt')
         print('DONE.')
     else:
         print('No documents were found in the union ranking.')
 
     if intersect_rank:
-        print('Ranking of relevant documents containing all query terms')
-        url_gen(intersect_rank, 6, 'intersect_results.txt')
+        print('Ranking of TOP 10 relevant documents containing all query terms')
+        url_gen(intersect_rank, 10, 'intersect_results.txt')
         print('DONE.')
     else:
         print('No documents were found in the intersect ranking.')

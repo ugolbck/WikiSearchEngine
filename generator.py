@@ -9,37 +9,41 @@ from numpy import zeros
 import numpy as np
 import math
 import sys
+import os
 
 # Turns xml parsed file into separate documents
-def docsToFiles(fname, language):
+def docsToFiles(foldername, language):
     backup = {}
     folder_path = './DOCUMENTS/'
-    with open(fname) as in_file:
-        lines = [[line.rstrip('\n')] for line in in_file]
+    input_path = './' + foldername
 
-    for line in lines:
-        if '<doc id=' in line[0]:
-            elements = line[0].split(' ')
-            docID = elements[1][4:-1]
-            url = elements[2][5:-1] 
-            flt = []
-            backup[docID] = url
-            # print(elements)
-        elif '</doc>' in line[0]:
-            with open(folder_path + docID + '.txt', 'w') as f:
-                flt = re.sub(r'[^\w\s]', '', str(flt))
-                f.write(flt)
-            docID = None
-        else:
-            if docID and line[0] != '':
-                sl = []
-                sl.extend(line)
-                s = re.sub(r'[^\w\s]', '', sl[0])
-                tokens = nltk.word_tokenize(s.lower())
-                new = [w for w in tokens if not w in stopwords.words(language)]
-                stemmer = PorterStemmer()
-                final = [stemmer.stem(word) for word in new]
-                flt.extend(final)
+    for filename in os.listdir(input_path):
+        with open(input_path + '/' + filename) as in_file:
+            lines = [[line.rstrip('\n')] for line in in_file]
+
+        for line in lines:
+            if '<doc id=' in line[0]:
+                elements = line[0].split(' ')
+                docID = elements[1][4:-1]
+                url = elements[2][5:-1] 
+                flt = []
+                backup[docID] = url
+                # print(elements)
+            elif '</doc>' in line[0]:
+                with open(folder_path + docID + '.txt', 'w') as f:
+                    flt = re.sub(r'[^\w\s]', '', str(flt))
+                    f.write(flt)
+                docID = None
+            else:
+                if docID and line[0] != '':
+                    sl = []
+                    sl.extend(line)
+                    s = re.sub(r'[^\w\s]', '', sl[0])
+                    tokens = nltk.word_tokenize(s.lower())
+                    new = [w for w in tokens if not w in stopwords.words(language)]
+                    stemmer = PorterStemmer()
+                    final = [stemmer.stem(word) for word in new]
+                    flt.extend(final)
          
     return backup
 
@@ -110,7 +114,7 @@ if __name__ == '__main__':
     
     if len(sys.argv) != 2:
         print('Wrong number of arguments. You must run the program with the following command:\n \
-        python generator.py <parsed xml file>')
+        python generator.py <parsed xml folder>')
         sys.exit(0)
     
     backup = docsToFiles(sys.argv[1], 'english')
